@@ -1,0 +1,19 @@
+Stage1 Name: Flux
+
+Type: text to video
+
+Link: https://flux-image.com/generator
+
+Input: Generate two Chinese person, a woman in black hair, one man in white shirt on the red background image.
+
+Stage2 Name: Kling
+
+Type: image+text to video
+
+Link: https://app.klingai.com/global/video/new
+
+Input: input_image1.jpg
+
+Prompt: 无形双手进入画面，流畅帮女人换衣服，带面膜，梳头，化妆，男人静止微笑；自然过渡；
+
+Output: kling_output.mp4
