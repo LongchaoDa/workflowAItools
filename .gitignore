@@ -6,3 +6,9 @@ coverage
 *.log
 .DS_Store
 backend/src/data/db.json
+backend/src/data/db.test.json
+backend/src/data/*.db
+assets/uploads/*
+!assets/uploads/.gitkeep
+
+.note.txt
