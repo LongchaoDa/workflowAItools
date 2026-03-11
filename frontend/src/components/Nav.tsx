@@ -25,15 +25,13 @@ export const Nav = ({ token, onLogout }: Props) => {
 
   return (
     <header className="topbar-wrap">
-      <div className="orb orb-left" />
-      <div className="orb orb-right" />
       <div className="topbar">
         <div className="brand-row">
-          <button className="ghost-btn" onClick={() => navigate("/")}>
-            <span className="brand-mark">◆</span>
+          <button className="brand-home" onClick={() => navigate("/")}>
+            <span className="brand-mark" />
             <span className="brand-text">WorkflowBase</span>
           </button>
-          <button className="ghost-btn nav-lite" onClick={() => navigate("/")}>☰ Categories</button>
+          <span className="brand-subtitle">Notion-style workflow studio</span>
         </div>
 
         <form className="search-shell" onSubmit={onSearch}>
@@ -42,9 +40,7 @@ export const Nav = ({ token, onLogout }: Props) => {
             onChange={(e) => setKeyword(e.target.value)}
             placeholder="Search workflows, prompts, tools"
           />
-          <button type="submit" className="search-go" aria-label="Search">
-            ⌕
-          </button>
+          <button type="submit" className="search-go">Search</button>
         </form>
 
         <nav className="main-nav">
@@ -57,7 +53,6 @@ export const Nav = ({ token, onLogout }: Props) => {
           ) : (
             <NavLink to="/auth">Login</NavLink>
           )}
-          <button className="ghost-btn nav-lite">☷</button>
         </nav>
       </div>
     </header>

@@ -9,6 +9,7 @@ interface Props {
 
 interface CardItem {
   id: string;
+  kind: "example" | "note";
   date: string;
   title: string;
   subtitle: string;
@@ -20,12 +21,12 @@ interface CardItem {
 }
 
 const palette = [
-  ["#ff8a5b", "#472466"],
-  ["#49d8ba", "#1f3f86"],
-  ["#61a7ff", "#252e73"],
-  ["#fd5d74", "#3b1c58"],
-  ["#8ce969", "#20456d"],
-  ["#ffbc52", "#6a2d50"]
+  ["#edf4ff", "#f8fbff"],
+  ["#e8f7ff", "#f4fbff"],
+  ["#eff3ff", "#f9fbff"],
+  ["#e8f1ff", "#f8fbff"],
+  ["#f2f7ff", "#fbfdff"],
+  ["#ecf6ff", "#f8fcff"]
 ];
 
 const toneFor = (seed: string): [string, string] => {
@@ -62,12 +63,13 @@ export const ExplorePage = ({ token }: Props) => {
     void load();
   }, [keyword]);
 
-  const cards = useMemo<CardItem[]>(() => {
+  const cards = useMemo<{ examples: CardItem[]; notes: CardItem[] }>(() => {
     const q = keyword.trim().toLowerCase();
-    const exampleCards = examples
+    const exampleCards: CardItem[] = examples
       .filter((ex) => !q || `${ex.title} ${ex.summary}`.toLowerCase().includes(q))
       .map((ex) => ({
         id: `example-${ex.slug}`,
+        kind: "example",
         date: new Date(ex.date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }),
         title: ex.title,
         subtitle: ex.summary,
@@ -77,8 +79,9 @@ export const ExplorePage = ({ token }: Props) => {
         coverImageUrl: ex.coverImageUrl
       }));
 
-    const noteCards = notes.map((note) => ({
+    const noteCards: CardItem[] = notes.map((note) => ({
       id: `note-${note.id}`,
+      kind: "note",
       date: new Date(note.createdAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }),
       title: note.title,
       subtitle: note.summary,
@@ -88,7 +91,7 @@ export const ExplorePage = ({ token }: Props) => {
       noteId: note.id
     }));
 
-    return [...exampleCards, ...noteCards];
+    return { examples: exampleCards, notes: noteCards };
   }, [examples, notes]);
 
   const saveCard = async (noteId: string) => {
@@ -107,10 +110,15 @@ export const ExplorePage = ({ token }: Props) => {
 
   return (
     <section className="page-enter">
-      <div className="hero-block">
+      <div className="hero-block panel hero-surface">
         <p className="hero-kicker">AI Workflow Library</p>
-        <h1>Blog</h1>
-        <p>Click any card to open full workflow graph with nodes, edge prompts, and media previews.</p>
+        <h1>Clean Workflow Hub</h1>
+        <p>Browse curated examples and community workflows. Open any card to inspect graph, prompts, and media previews.</p>
+        <div className="chip-row">
+          <span className="chip">Notion-style layout</span>
+          <span className="chip">Blue-gray palette</span>
+          <span className="chip">Editable workflow stages</span>
+        </div>
       </div>
 
       {busy ? <div className="status-bar">Loading workflows...</div> : null}
@@ -121,58 +129,109 @@ export const ExplorePage = ({ token }: Props) => {
         </div>
       ) : null}
 
-      <div className="grid-wall">
-        {cards.map((card, index) => {
-          const [toneA, toneB] = toneFor(card.id + card.primaryTool);
-          const style = {
-            "--tone-a": toneA,
-            "--tone-b": toneB,
-            animationDelay: `${index * 60}ms`,
-            backgroundImage: card.coverImageUrl
-              ? `linear-gradient(180deg, rgba(8,12,34,0.2), rgba(8,12,34,0.85)), url('${withApiBase(card.coverImageUrl)}')`
-              : undefined,
-            backgroundSize: card.coverImageUrl ? "cover" : undefined,
-            backgroundPosition: card.coverImageUrl ? "center" : undefined
-          } as CSSProperties;
+      <section className="section-block">
+        <div className="section-head">
+          <h2>Official Examples</h2>
+          <p>Built-in sample workflows from local assets.</p>
+        </div>
+        <div className="grid-wall">
+          {cards.examples.map((card, index) => {
+            const [toneA, toneB] = toneFor(card.id + card.primaryTool);
+            const style = {
+              "--tone-a": toneA,
+              "--tone-b": toneB,
+              animationDelay: `${index * 60}ms`,
+              backgroundImage: card.coverImageUrl
+                ? `linear-gradient(180deg, rgba(255,255,255,0.65), rgba(255,255,255,0.92)), url('${withApiBase(card.coverImageUrl)}')`
+                : undefined,
+              backgroundSize: card.coverImageUrl ? "cover" : undefined,
+              backgroundPosition: card.coverImageUrl ? "center" : undefined
+            } as CSSProperties;
 
-          return (
-            <article
-              key={card.id}
-              className="workflow-card reveal clickable"
-              style={style}
-              onClick={() => navigate(card.href)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") navigate(card.href);
-              }}
-            >
-              <span className="date-pill">{card.date}</span>
-              <div className="scanline" />
-              <div className="card-body">
-                <p>{card.subtitle}</p>
-                <h3>{card.title}</h3>
-                <div className="meta-row">
-                  <span>{card.primaryTool}</span>
-                  <span>{card.difficulty}</span>
-                  {card.noteId ? (
-                    <button
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        void saveCard(card.noteId!);
-                      }}
-                    >
-                      Save
-                    </button>
-                  ) : (
+            return (
+              <article
+                key={card.id}
+                className="workflow-card reveal clickable"
+                style={style}
+                onClick={() => navigate(card.href)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") navigate(card.href);
+                }}
+              >
+                <span className="date-pill">{card.date}</span>
+                <div className="card-body">
+                  <h3>{card.title}</h3>
+                  <p>{card.subtitle}</p>
+                  <div className="meta-row">
+                    <span>{card.primaryTool}</span>
+                    <span>{card.difficulty}</span>
                     <span>Open</span>
-                  )}
+                  </div>
                 </div>
-              </div>
-            </article>
-          );
-        })}
-      </div>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="section-block">
+        <div className="section-head">
+          <h2>Community Workflows</h2>
+          <p>Public notes published by creators.</p>
+        </div>
+        {cards.notes.length === 0 ? (
+          <div className="panel empty-state">No public notes matched your search yet.</div>
+        ) : (
+          <div className="grid-wall">
+            {cards.notes.map((card, index) => {
+              const [toneA, toneB] = toneFor(card.id + card.primaryTool);
+              const style = {
+                "--tone-a": toneA,
+                "--tone-b": toneB,
+                animationDelay: `${index * 60}ms`
+              } as CSSProperties;
+
+              return (
+                <article
+                  key={card.id}
+                  className="workflow-card reveal clickable"
+                  style={style}
+                  onClick={() => navigate(card.href)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") navigate(card.href);
+                  }}
+                >
+                  <span className="date-pill">{card.date}</span>
+                  <div className="card-body">
+                    <h3>{card.title}</h3>
+                    <p>{card.subtitle}</p>
+                    <div className="meta-row">
+                      <span>{card.primaryTool}</span>
+                      <span>{card.difficulty}</span>
+                      {card.noteId ? (
+                        <button
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            void saveCard(card.noteId!);
+                          }}
+                        >
+                          Save
+                        </button>
+                      ) : (
+                        <span>Open</span>
+                      )}
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </section>
     </section>
   );
 };

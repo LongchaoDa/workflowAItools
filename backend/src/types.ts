@@ -42,8 +42,13 @@ export interface Bookmark {
   createdAt: string;
 }
 
-export interface DatabaseShape {
-  users: User[];
-  notes: Note[];
-  bookmarks: Bookmark[];
+export interface UploadAsset {
+  id: string;
+  userId: string;
+  noteId?: string;
+  originalName: string;
+  mimeType: string;
+  storagePath: string;
+  sizeBytes: number;
+  createdAt: string;
 }

@@ -7,30 +7,49 @@ interface Props {
 
 export const AuthPage = ({ onToken }: Props) => {
   const [isRegister, setIsRegister] = useState(false);
-  const [email, setEmail] = useState("demo@workflowbase.ai");
-  const [username, setUsername] = useState("demo_creator");
-  const [displayName, setDisplayName] = useState("Workflow Demo");
-  const [password, setPassword] = useState("demo123456");
+  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("workflow_creator");
+  const [displayName, setDisplayName] = useState("Workflow Creator");
+  const [password, setPassword] = useState("");
   const [msg, setMsg] = useState("");
+  const [success, setSuccess] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const fillDemo = () => {
     setEmail("demo@workflowbase.ai");
     setPassword("demo123456");
+    setSuccess(false);
     setMsg("Demo account filled. Click login.");
   };
 
+  const fillQaAccount = () => {
+    setEmail("dalongchao@gmail.com");
+    setPassword("dalongchao1");
+    setUsername("dalongchao");
+    setDisplayName("Dalongchao");
+    setSuccess(false);
+    setMsg("QA account filled. You can register or login.");
+  };
+
   const submit = async () => {
+    setSubmitting(true);
+    setMsg("");
     try {
       if (isRegister) {
         const data = await register({ email, username, displayName, password });
         onToken(data.token);
+        setMsg("Account created and logged in.");
       } else {
         const data = await login({ email, password });
         onToken(data.token);
+        setMsg("Logged in successfully.");
       }
-      setMsg("Authentication successful.");
-    } catch {
-      setMsg("Authentication failed. Check credentials.");
+      setSuccess(true);
+    } catch (error) {
+      setSuccess(false);
+      setMsg(error instanceof Error ? error.message : "Authentication failed. Check credentials.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -41,7 +60,10 @@ export const AuthPage = ({ onToken }: Props) => {
         <h2>{isRegister ? "Create account" : "Login"}</h2>
         <p>Use your account to publish notes, manage workflows, and save community recipes.</p>
         <p className="mono">Default demo: demo@workflowbase.ai / demo123456</p>
-        <button className="ghost-btn" onClick={fillDemo}>Use Demo Account</button>
+        <div className="row">
+          <button className="secondary" onClick={fillDemo}>Use Demo Account</button>
+          <button className="secondary" onClick={fillQaAccount}>Use QA Account</button>
+        </div>
       </div>
 
       <div className="panel">
@@ -69,13 +91,13 @@ export const AuthPage = ({ onToken }: Props) => {
         </label>
 
         <div className="row">
-          <button onClick={submit}>{isRegister ? "Register" : "Login"}</button>
-          <button className="secondary" onClick={() => setIsRegister((v) => !v)}>
+          <button onClick={submit} disabled={submitting}>{submitting ? "Submitting..." : isRegister ? "Register" : "Login"}</button>
+          <button className="secondary" onClick={() => setIsRegister((v) => !v)} disabled={submitting}>
             {isRegister ? "Switch to Login" : "Switch to Register"}
           </button>
         </div>
 
-        {msg ? <div className="status-bar">{msg}</div> : null}
+        {msg ? <div className={`status-bar ${success ? "success" : ""}`}>{msg}</div> : null}
       </div>
     </section>
   );

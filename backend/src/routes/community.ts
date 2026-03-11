@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { requireAuth } from "../middleware/auth.js";
-import { listBookmarks, searchPublicNotes, upsertBookmark } from "../db.js";
+import { getNoteById, listBookmarks, searchPublicNotes, upsertBookmark } from "../db.js";
 import { createId } from "../utils/id.js";
 
 const router = Router();
@@ -24,6 +24,19 @@ router.get("/search", (req, res) => {
 
 router.post("/bookmarks/:noteId", requireAuth, (req, res) => {
   const noteId = Array.isArray(req.params.noteId) ? req.params.noteId[0] : req.params.noteId;
+  const note = getNoteById(noteId);
+  if (!note) {
+    return res.status(404).json({ message: "Note not found" });
+  }
+
+  if (note.visibility === "private") {
+    return res.status(403).json({ message: "Private note cannot be bookmarked" });
+  }
+
+  if (note.status !== "published") {
+    return res.status(400).json({ message: "Only published note can be bookmarked" });
+  }
+
   const bookmark = upsertBookmark({
     id: createId(),
     userId: req.user!.id,

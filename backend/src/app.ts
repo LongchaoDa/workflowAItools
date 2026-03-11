@@ -5,6 +5,7 @@ import authRoutes from "./routes/auth.js";
 import noteRoutes from "./routes/notes.js";
 import communityRoutes from "./routes/community.js";
 import workflowRoutes from "./routes/workflows.js";
+import uploadRoutes from "./routes/uploads.js";
 
 export const buildApp = () => {
   const app = express();
@@ -46,6 +47,7 @@ export const buildApp = () => {
           <li>Health: <a href="/health"><code>GET /health</code></a></li>
           <li>Auth: <code>POST /api/auth/register</code>, <code>POST /api/auth/login</code></li>
           <li>Notes: <code>POST /api/notes</code>, <code>GET /api/notes/mine</code></li>
+          <li>Uploads: <code>POST /api/uploads</code>, <code>GET /api/uploads/mine</code></li>
           <li>Community: <code>GET /api/community/search</code>, <code>GET /api/community/bookmarks</code></li>
         </ul>
       </div>
@@ -60,6 +62,7 @@ export const buildApp = () => {
 
   app.use("/api/auth", authRoutes);
   app.use("/api/notes", noteRoutes);
+  app.use("/api/uploads", uploadRoutes);
   app.use("/api/community", communityRoutes);
   app.use("/api/workflows", workflowRoutes);
 

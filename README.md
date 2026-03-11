@@ -19,14 +19,14 @@
 
 - Frontend: React + Vite + TypeScript
 - Backend: Node.js + Express + TypeScript
-- Data: 本地 JSON 数据库（`backend/src/data/db.json`）
+- Data: SQLite 数据库（开发 `backend/src/data/app.db`，测试 `backend/src/data/app.test.db`）
 
 ## 本地启动
 
 1. 安装依赖
 
 ```bash
-cd /Users/danielsmith/Documents/1-RL/ASU/research/68WildFireDEMA/DEMA_Response/ai-workflow-platform
+cd /Users/danielsmith/Documents/1-RL/ASU/research/77workflowAItools
 npm install
 npm run install:all
 ```
@@ -61,6 +61,8 @@ npm run test
 - `GET /api/notes/mine` (auth)
 - `GET /api/notes/:id` (public note detail)
 - `PATCH /api/notes/:id` (auth)
+- `POST /api/uploads` (auth, multipart/form-data, field: `file`)
+- `GET /api/uploads/mine` (auth)
 - `GET /api/community/search`
 - `POST /api/community/bookmarks/:noteId` (auth)
 - `GET /api/community/bookmarks` (auth)
@@ -72,3 +74,25 @@ npm run test
 
 这个版本优先保证你“今天能在本地启动和测试完整流程”。
 下一步如果你确认，我可以直接把数据层切到 PostgreSQL + Prisma（schema 按你文档的 users/tools/notes/workflow_steps/assets/tags/bookmarks 扩展）。
+
+
+# check DB files: 
+
+cd /Users/danielsmith/Documents/1-RL/ASU/research/77workflowAItools
+
+# 查看所有表
+sqlite3 backend/src/data/app.db ".tables"
+
+# 查看某张表结构
+sqlite3 backend/src/data/app.db ".schema users"
+
+# 查看用户数据（示例）
+sqlite3 backend/src/data/app.db "SELECT id, email, username, created_at FROM users;"
+
+# 更易读的表格输出（交互式）
+sqlite3 backend/src/data/app.db
+# 进入后执行：
+.headers on
+.mode column
+.tables
+SELECT * FROM users LIMIT 20;

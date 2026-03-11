@@ -10,10 +10,19 @@ interface Props {
 export const BookmarksPage = ({ token }: Props) => {
   const navigate = useNavigate();
   const [notes, setNotes] = useState<Note[]>([]);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (!token) return;
-    listBookmarks(token).then(setNotes).catch(() => setNotes([]));
+    listBookmarks(token)
+      .then((data) => {
+        setNotes(data);
+        setError("");
+      })
+      .catch((err) => {
+        setNotes([]);
+        setError(err instanceof Error ? err.message : "Failed to load bookmarks.");
+      });
   }, [token]);
 
   if (!token) {
@@ -28,27 +37,32 @@ export const BookmarksPage = ({ token }: Props) => {
         <p>Your favorite workflows from the public community pool.</p>
       </div>
 
-      <div className="grid-wall compact">
-        {notes.map((note) => (
-          <article
-            key={note.id}
-            className="workflow-card reveal clickable"
-            style={{ "--tone-a": "#8be35f", "--tone-b": "#233a76" } as CSSProperties}
-            onClick={() => navigate(`/workflow/note/${note.id}`)}
-          >
-            <span className="date-pill">{new Date(note.createdAt).toLocaleDateString()}</span>
-            <div className="card-body">
-              <p>{note.summary}</p>
-              <h3>{note.title}</h3>
-              <div className="meta-row">
-                <span>{note.primaryTool}</span>
-                <span>{note.difficultyLevel}</span>
-                <span>{note.visibility}</span>
+      {error ? <div className="status-bar">{error}</div> : null}
+      {notes.length === 0 ? (
+        <div className="panel empty-state">No bookmarks yet. Save a public workflow from Explore.</div>
+      ) : (
+        <div className="grid-wall compact">
+          {notes.map((note) => (
+            <article
+              key={note.id}
+              className="workflow-card reveal clickable"
+              style={{ "--tone-a": "#ebf2ff", "--tone-b": "#f8fbff" } as CSSProperties}
+              onClick={() => navigate(`/workflow/note/${note.id}`)}
+            >
+              <span className="date-pill">{new Date(note.createdAt).toLocaleDateString()}</span>
+              <div className="card-body">
+                <h3>{note.title}</h3>
+                <p>{note.summary}</p>
+                <div className="meta-row">
+                  <span>{note.primaryTool}</span>
+                  <span>{note.difficultyLevel}</span>
+                  <span>{note.visibility}</span>
+                </div>
               </div>
-            </div>
-          </article>
-        ))}
-      </div>
+            </article>
+          ))}
+        </div>
+      )}
     </section>
   );
 };

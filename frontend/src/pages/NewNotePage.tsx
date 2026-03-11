@@ -31,6 +31,8 @@ export const NewNotePage = ({ token }: Props) => {
   const [visibility, setVisibility] = useState<Visibility>("public");
   const [tags, setTags] = useState("image-to-video,fashion,cinematic");
   const [message, setMessage] = useState("");
+  const [success, setSuccess] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [steps, setSteps] = useState<StepDraft[]>([
     {
       id: "step-1",
@@ -60,15 +62,19 @@ export const NewNotePage = ({ token }: Props) => {
 
   const submit = async () => {
     if (!token) {
+      setSuccess(false);
       setMessage("Please login first");
       return;
     }
 
     if (steps.some((step) => !step.title || !step.description || !step.promptText)) {
+      setSuccess(false);
       setMessage("Please complete all workflow steps before publishing.");
       return;
     }
 
+    setSubmitting(true);
+    setMessage("");
     try {
       await createNote(token, {
         title,
@@ -91,9 +97,13 @@ export const NewNotePage = ({ token }: Props) => {
         }))
       });
 
+      setSuccess(true);
       setMessage("Workflow note created successfully.");
-    } catch {
-      setMessage("Failed to create note.");
+    } catch (error) {
+      setSuccess(false);
+      setMessage(error instanceof Error ? error.message : "Failed to create note.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -102,6 +112,7 @@ export const NewNotePage = ({ token }: Props) => {
       <div className="panel">
         <p className="hero-kicker">Creator Studio</p>
         <h2>Publish an editable workflow</h2>
+        <p className="muted">Describe your goal, then split the process into clear stages with prompt text.</p>
 
         <div className="row">
           <label>
@@ -187,8 +198,8 @@ export const NewNotePage = ({ token }: Props) => {
           ))}
         </div>
 
-        <button onClick={submit}>Publish Workflow</button>
-        {message ? <div className="status-bar">{message}</div> : null}
+        <button onClick={submit} disabled={submitting}>{submitting ? "Publishing..." : "Publish Workflow"}</button>
+        {message ? <div className={`status-bar ${success ? "success" : ""}`}>{message}</div> : null}
       </div>
     </section>
   );

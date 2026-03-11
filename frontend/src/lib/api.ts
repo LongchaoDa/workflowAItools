@@ -33,7 +33,7 @@ export const register = async (payload: {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
-  if (!res.ok) throw new Error("Register failed");
+  if (!res.ok) throw new Error(await readErrorMessage(res, "Register failed"));
   return res.json();
 };
 
@@ -43,7 +43,7 @@ export const login = async (payload: { email: string; password: string }): Promi
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
-  if (!res.ok) throw new Error("Login failed");
+  if (!res.ok) throw new Error(await readErrorMessage(res, "Login failed"));
   return res.json();
 };
 
@@ -67,7 +67,7 @@ export const createNote = async (
     },
     body: JSON.stringify(payload)
   });
-  if (!res.ok) throw new Error("Create note failed");
+  if (!res.ok) throw new Error(await readErrorMessage(res, "Create note failed"));
   return res.json() as Promise<Note>;
 };
 
@@ -75,7 +75,7 @@ export const listMyNotes = async (token: string): Promise<Note[]> => {
   const res = await fetch(`${API_BASE}/api/notes/mine`, {
     headers: { Authorization: `Bearer ${token}` }
   });
-  if (!res.ok) throw new Error("Fetch notes failed");
+  if (!res.ok) throw new Error(await readErrorMessage(res, "Fetch notes failed"));
   return res.json();
 };
 
@@ -97,7 +97,7 @@ export const searchPublicNotes = async (keyword: string): Promise<Note[]> => {
   const url = new URL(`${API_BASE}/api/community/search`);
   if (keyword) url.searchParams.set("keyword", keyword);
   const res = await fetch(url.toString());
-  if (!res.ok) throw new Error("Search failed");
+  if (!res.ok) throw new Error(await readErrorMessage(res, "Search failed"));
   return res.json();
 };
 
@@ -106,7 +106,7 @@ export const bookmark = async (token: string, noteId: string) => {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` }
   });
-  if (!res.ok) throw new Error("Bookmark failed");
+  if (!res.ok) throw new Error(await readErrorMessage(res, "Bookmark failed"));
   return res.json();
 };
 
@@ -114,13 +114,13 @@ export const listBookmarks = async (token: string): Promise<Note[]> => {
   const res = await fetch(`${API_BASE}/api/community/bookmarks`, {
     headers: { Authorization: `Bearer ${token}` }
   });
-  if (!res.ok) throw new Error("Fetch bookmarks failed");
+  if (!res.ok) throw new Error(await readErrorMessage(res, "Fetch bookmarks failed"));
   return res.json();
 };
 
 export const listWorkflowExamples = async (): Promise<WorkflowExampleSummary[]> => {
   const res = await fetch(`${API_BASE}/api/workflows/examples`);
-  if (!res.ok) throw new Error("Fetch workflow examples failed");
+  if (!res.ok) throw new Error(await readErrorMessage(res, "Fetch workflow examples failed"));
   return res.json();
 };
 
